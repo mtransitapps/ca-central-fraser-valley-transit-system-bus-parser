@@ -186,10 +186,17 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 	private static final String DOWNTOWN_EX = "Downtown Ex";
 	private static final String HATZIC = "Hatzic";
 	private static final String COUNTER_CLOCK_WISE = "CounterClockWise";
+	private static final String BLUERIDGE = "Blueridge";
+	private static final String DOWNTOWN = "Downtown";
 
 	@Override
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
-		if (mRoute.id == 2l) {
+		if (mRoute.id == 1l) {
+			if (gTrip.getDirectionId() == 1 && DOWNTOWN.equalsIgnoreCase(gTrip.getTripHeadsign())) {
+				mTrip.setHeadsignString(BLUERIDGE, gTrip.getDirectionId());
+				return;
+			}
+		} else if (mRoute.id == 2l) {
 			if (gTrip.getDirectionId() == 0) {
 				mTrip.setHeadsignDirection(MDirectionType.EAST);
 				return;
