@@ -191,12 +191,12 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 
 	@Override
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
-		if (mRoute.id == 1l) {
+		if (mRoute.getId() == 1l) {
 			if (gTrip.getDirectionId() == 1 && DOWNTOWN.equalsIgnoreCase(gTrip.getTripHeadsign())) {
 				mTrip.setHeadsignString(BLUERIDGE, gTrip.getDirectionId());
 				return;
 			}
-		} else if (mRoute.id == 2l) {
+		} else if (mRoute.getId() == 2l) {
 			if (gTrip.getDirectionId() == 0) {
 				mTrip.setHeadsignDirection(MDirectionType.EAST);
 				return;
@@ -204,7 +204,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				mTrip.setHeadsignDirection(MDirectionType.WEST);
 				return;
 			}
-		} else if (mRoute.id == 3l) {
+		} else if (mRoute.getId() == 3l) {
 			if (gTrip.getDirectionId() == 0) {
 				mTrip.setHeadsignDirection(MDirectionType.EAST);
 				return;
@@ -212,12 +212,12 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				mTrip.setHeadsignDirection(MDirectionType.WEST);
 				return;
 			}
-		} else if (mRoute.id == 4l) {
+		} else if (mRoute.getId() == 4l) {
 			if (gTrip.getDirectionId() == 1) {
 				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
 				return;
 			}
-		} else if (mRoute.id == 5l) {
+		} else if (mRoute.getId() == 5l) {
 			if (gTrip.getDirectionId() == 0) {
 				mTrip.setHeadsignDirection(MDirectionType.EAST);
 				return;
@@ -225,17 +225,17 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				mTrip.setHeadsignDirection(MDirectionType.WEST);
 				return;
 			}
-		} else if (mRoute.id == 6l) {
+		} else if (mRoute.getId() == 6l) {
 			if (gTrip.getDirectionId() == 1) {
 				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
 				return;
 			}
-		} else if (mRoute.id == 7l) {
+		} else if (mRoute.getId() == 7l) {
 			if (gTrip.getDirectionId() == 1) {
 				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
 				return;
 			}
-		} else if (mRoute.id == 12l) {
+		} else if (mRoute.getId() == 12l) {
 			if (gTrip.getDirectionId() == 0) {
 				mTrip.setHeadsignDirection(MDirectionType.NORTH);
 				return;
@@ -243,7 +243,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				mTrip.setHeadsignDirection(MDirectionType.SOUTH);
 				return;
 			}
-		} else if (mRoute.id == 15l) {
+		} else if (mRoute.getId() == 15l) {
 			if (gTrip.getDirectionId() == 0) {
 				mTrip.setHeadsignString(DOWNTOWN_EX, gTrip.getDirectionId());
 				return;
@@ -251,7 +251,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				mTrip.setHeadsignString(AUGUSTON, gTrip.getDirectionId());
 				return;
 			}
-		} else if (mRoute.id == 16l) {
+		} else if (mRoute.getId() == 16l) {
 			if (gTrip.getDirectionId() == 0) {
 				mTrip.setHeadsignDirection(MDirectionType.EAST);
 				return;
@@ -259,12 +259,12 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				mTrip.setHeadsignDirection(MDirectionType.WEST);
 				return;
 			}
-		} else if (mRoute.id == 17l) {
+		} else if (mRoute.getId() == 17l) {
 			if (gTrip.getDirectionId() == 0) {
 				mTrip.setHeadsignString(CLOCK_WISE, gTrip.getDirectionId());
 				return;
 			}
-		} else if (mRoute.id == 21l) {
+		} else if (mRoute.getId() == 21l) {
 			if (gTrip.getDirectionId() == 0) {
 				mTrip.setHeadsignDirection(MDirectionType.EAST);
 				return;
@@ -272,7 +272,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				mTrip.setHeadsignDirection(MDirectionType.WEST);
 				return;
 			}
-		} else if (mRoute.id == 31l) {
+		} else if (mRoute.getId() == 31l) {
 			if (gTrip.getDirectionId() == 0) {
 				mTrip.setHeadsignString(MISSION, gTrip.getDirectionId());
 				return;
@@ -280,17 +280,17 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				mTrip.setHeadsignString(ABBOTSFORD, gTrip.getDirectionId());
 				return;
 			}
-		} else if (mRoute.id == 32l) {
+		} else if (mRoute.getId() == 32l) {
 			if (gTrip.getDirectionId() == 1) {
 				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
 				return;
 			}
-		} else if (mRoute.id == 33l) {
+		} else if (mRoute.getId() == 33l) {
 			if (gTrip.getDirectionId() == 1) {
 				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
 				return;
 			}
-		} else if (mRoute.id == 34l) {
+		} else if (mRoute.getId() == 34l) {
 			if (gTrip.getDirectionId() == 0) {
 				mTrip.setHeadsignDirection(MDirectionType.NORTH);
 				return;
@@ -298,7 +298,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				mTrip.setHeadsignDirection(MDirectionType.SOUTH);
 				return;
 			}
-		} else if (mRoute.id == 35l) {
+		} else if (mRoute.getId() == 35l) {
 			if (gTrip.getDirectionId() == 0) {
 				mTrip.setHeadsignString(DOWNTOWN_EX, gTrip.getDirectionId());
 				return;
@@ -306,7 +306,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				mTrip.setHeadsignString(HATZIC, gTrip.getDirectionId());
 				return;
 			}
-		} else if (mRoute.id == 40l) {
+		} else if (mRoute.getId() == 40l) {
 			if (gTrip.getDirectionId() == 1) {
 				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
 				return;
@@ -346,13 +346,10 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 
 	private static final Pattern STARTS_WITH_BOUND = Pattern.compile("(^(east|west|north|south)bound)", Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern AT = Pattern.compile("( at )", Pattern.CASE_INSENSITIVE);
-	private static final String AT_REPLACEMENT = " / ";
-
 	@Override
 	public String cleanStopName(String gStopName) {
 		gStopName = STARTS_WITH_BOUND.matcher(gStopName).replaceAll(StringUtils.EMPTY);
-		gStopName = AT.matcher(gStopName).replaceAll(AT_REPLACEMENT);
+		gStopName = CleanUtils.CLEAN_AT.matcher(gStopName).replaceAll(CleanUtils.CLEAN_AT_REPLACEMENT);
 		gStopName = EXCHANGE.matcher(gStopName).replaceAll(EXCHANGE_REPLACEMENT);
 		gStopName = CleanUtils.cleanStreetTypes(gStopName);
 		return CleanUtils.cleanLabel(gStopName);
