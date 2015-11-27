@@ -331,6 +331,11 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				mTrip.setHeadsignString(HATZIC, gTrip.getDirectionId());
 				return;
 			}
+		} else if (mRoute.getId() == 39l) {
+			if (gTrip.getDirectionId() == 0) {
+				mTrip.setHeadsignString(CLOCK_WISE, gTrip.getDirectionId());
+				return;
+			}
 		} else if (mRoute.getId() == 40l) {
 			if (gTrip.getDirectionId() == 1) {
 				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
