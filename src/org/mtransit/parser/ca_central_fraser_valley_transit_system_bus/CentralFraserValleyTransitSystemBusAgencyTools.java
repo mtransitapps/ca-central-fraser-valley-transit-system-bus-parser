@@ -13,6 +13,7 @@ import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MDirectionType;
+import org.mtransit.parser.mt.data.MInboundType;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.mt.data.MTrip;
@@ -270,6 +271,30 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				return;
 			} else if (gTrip.getDirectionId() == 1) {
 				mTrip.setHeadsignDirection(MDirectionType.WEST);
+				return;
+			}
+		} else if (mRoute.getId() == 23l) {
+			if (gTrip.getDirectionId() == 0) {
+				mTrip.setHeadsignString(CLOCK_WISE, gTrip.getDirectionId());
+				return;
+			} else if (gTrip.getDirectionId() == 1) {
+				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
+				return;
+			}
+		} else if (mRoute.getId() == 24l) {
+			if (gTrip.getDirectionId() == 0) {
+				mTrip.setHeadsignString(CLOCK_WISE, gTrip.getDirectionId());
+				return;
+			} else if (gTrip.getDirectionId() == 1) {
+				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
+				return;
+			}
+		} else if (mRoute.getId() == 26l) {
+			if (gTrip.getDirectionId() == 0) {
+				mTrip.setHeadsignInbound(MInboundType.INBOUND);
+				return;
+			} else if (gTrip.getDirectionId() == 1) {
+				mTrip.setHeadsignInbound(MInboundType.OUTBOUND);
 				return;
 			}
 		} else if (mRoute.getId() == 31l) {
