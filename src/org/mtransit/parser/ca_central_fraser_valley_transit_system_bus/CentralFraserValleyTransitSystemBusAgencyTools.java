@@ -1,6 +1,8 @@
 package org.mtransit.parser.ca_central_fraser_valley_transit_system_bus;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,9 +20,8 @@ import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.mt.data.MTrip;
 
-// http://bctransit.com/*/footer/open-data
-// http://bctransit.com/servlet/bctransit/data/GTFS.zip
-// http://bct2.baremetal.com:8080/GoogleTransit/BCTransit/google_transit.zip
+// https://bctransit.com/*/footer/open-data
+// https://bctransit.com/servlet/bctransit/data/GTFS - Central Fraser Valley
 public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgencyTools {
 
 	public static void main(String[] args) {
@@ -193,7 +194,11 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 	@Override
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
 		if (mRoute.getId() == 1l) {
-			if (gTrip.getDirectionId() == 1 && DOWNTOWN.equalsIgnoreCase(gTrip.getTripHeadsign())) {
+			if (gTrip.getDirectionId() == 0 && gTrip.getTripHeadsign().contains("McKee")) {
+				mTrip.setHeadsignString("McKee", gTrip.getDirectionId());
+				return;
+			}
+			if (gTrip.getDirectionId() == 1 && gTrip.getTripHeadsign().contains(BLUERIDGE)) {
 				mTrip.setHeadsignString(BLUERIDGE, gTrip.getDirectionId());
 				return;
 			}
@@ -343,6 +348,33 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 			}
 		}
 		mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), gTrip.getDirectionId());
+	}
+
+	@Override
+	public boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge) {
+		List<String> headsignsValues = Arrays.asList(mTrip.getHeadsignValue(), mTripToMerge.getHeadsignValue());
+		if (mTrip.getRouteId() == 1L) {
+			if (Arrays.asList( //
+					"BOURQUIN Ex", //
+					DOWNTOWN, //
+					BLUERIDGE //
+					).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString(BLUERIDGE, mTrip.getHeadsignId());
+				return true;
+			} else if (Arrays.asList( //
+					"BOURQUIN Ex", //
+					"McKee" //
+			).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString("McKee", mTrip.getHeadsignId());
+				return true;
+			}
+		}
+		if (isGoodEnoughAccepted()) {
+			return super.mergeHeadsign(mTrip, mTripToMerge);
+		}
+		System.out.printf("\n%s: Unexpected trips to merge: %s & %s!\n", mTrip.getRouteId(), mTrip, mTripToMerge);
+		System.exit(-1);
+		return false;
 	}
 
 	private static final Pattern EXCHANGE = Pattern.compile("(exchange)", Pattern.CASE_INSENSITIVE);
