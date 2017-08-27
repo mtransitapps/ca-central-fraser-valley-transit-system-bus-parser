@@ -278,6 +278,11 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				mTrip.setHeadsignDirection(MDirectionType.WEST);
 				return;
 			}
+		} else if (mRoute.getId() == 22l) {
+			if (gTrip.getDirectionId() == 1) {
+				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
+				return;
+			}
 		} else if (mRoute.getId() == 23l) {
 			if (gTrip.getDirectionId() == 0) {
 				mTrip.setHeadsignString(CLOCK_WISE, gTrip.getDirectionId());
