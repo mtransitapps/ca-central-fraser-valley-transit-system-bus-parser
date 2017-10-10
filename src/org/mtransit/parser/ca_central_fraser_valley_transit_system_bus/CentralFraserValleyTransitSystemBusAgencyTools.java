@@ -1,24 +1,32 @@
 package org.mtransit.parser.ca_central_fraser_valley_transit_system_bus;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.DefaultAgencyTools;
+import org.mtransit.parser.Pair;
+import org.mtransit.parser.SplitUtils;
+import org.mtransit.parser.SplitUtils.RouteTripSpec;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
+import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GTrip;
+import org.mtransit.parser.gtfs.data.GTripStop;
 import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MDirectionType;
-import org.mtransit.parser.mt.data.MInboundType;
 import org.mtransit.parser.mt.data.MRoute;
-import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.mt.data.MTrip;
+import org.mtransit.parser.mt.data.MTripStop;
 
 // https://bctransit.com/*/footer/open-data
 // https://bctransit.com/servlet/bctransit/data/GTFS - Central Fraser Valley
@@ -45,13 +53,8 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 		System.out.printf("\nGenerating CFV Transit System bus data... DONE in %s.\n", Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 
-	private static final String INCLUDE_ONLY_SERVICE_ID_CONTAINS = "CF";
-
 	@Override
 	public boolean excludeCalendar(GCalendar gCalendar) {
-		if (INCLUDE_ONLY_SERVICE_ID_CONTAINS != null && !gCalendar.getServiceId().contains(INCLUDE_ONLY_SERVICE_ID_CONTAINS)) {
-			return true;
-		}
 		if (this.serviceIds != null) {
 			return excludeUselessCalendar(gCalendar, this.serviceIds);
 		}
@@ -60,9 +63,6 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 
 	@Override
 	public boolean excludeCalendarDate(GCalendarDate gCalendarDates) {
-		if (INCLUDE_ONLY_SERVICE_ID_CONTAINS != null && !gCalendarDates.getServiceId().contains(INCLUDE_ONLY_SERVICE_ID_CONTAINS)) {
-			return true;
-		}
 		if (this.serviceIds != null) {
 			return excludeUselessCalendarDate(gCalendarDates, this.serviceIds);
 		}
@@ -81,9 +81,6 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 
 	@Override
 	public boolean excludeTrip(GTrip gTrip) {
-		if (INCLUDE_ONLY_SERVICE_ID_CONTAINS != null && !gTrip.getServiceId().contains(INCLUDE_ONLY_SERVICE_ID_CONTAINS)) {
-			return true;
-		}
 		if (this.serviceIds != null) {
 			return excludeUselessTrip(gTrip, this.serviceIds);
 		}
@@ -175,182 +172,203 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 			case 66: return COLOR_0D4D8B;
 			// @formatter:on
 			default:
-				return AGENCY_COLOR_BLUE;
+				if (isGoodEnoughAccepted()) {
+					return AGENCY_COLOR_BLUE;
+				}
+				System.out.printf("\n%s: Unexpected route color: %s!\n", gRoute);
+				System.exit(-1);
+				return null;
 			}
 		}
 		return super.getRouteColor(gRoute);
 	}
 
-	private static final String AUGUSTON = "Auguston";
-	private static final String CLOCK_WISE = "ClockWise";
-	private static final String MISSION = "Mission";
-	private static final String ABBOTSFORD = "Abbotsford";
-	private static final String DOWNTOWN_EX = "Downtown Ex";
-	private static final String HATZIC = "Hatzic";
-	private static final String COUNTER_CLOCK_WISE = "CounterClockWise";
+	private static final String EXCHANGE_SHORT = "Exch";
+
+	private static final String BOURQUIN_EXCHANGE = "Bourquin " + EXCHANGE_SHORT;
 	private static final String BLUERIDGE = "Blueridge";
 	private static final String DOWNTOWN = "Downtown";
+	private static final String BLUEJAY = "Bluejay";
+	private static final String HUNTINGDON = "Huntingdon";
+	private static final String BARRONS_WAY = "Barrons Way";
+	private static final String MC_KEE = "McKee";
+	private static final String UFV = "UFV";
+	private static final String CLEARBROOK = "Clearbrook";
+	private static final String SADDLE = "Saddle";
+	private static final String SANDY_HILL = "Sandy Hl";
+
+	private static HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
+	static {
+		HashMap<Long, RouteTripSpec> map2 = new HashMap<Long, RouteTripSpec>();
+		map2.put(5L, new RouteTripSpec(5L, //
+				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), //
+				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) //
+				.addTripSort(MDirectionType.EAST.intValue(), //
+						Arrays.asList(new String[] { //
+						"107273", // Westbound South Fraser at Countess
+								"107499", // Bourquin Exchange Bay A
+						})) //
+				.addTripSort(MDirectionType.WEST.intValue(), //
+						Arrays.asList(new String[] { //
+						"108262", // Bourquin Exchange Bay D
+								"107022", // ==
+								"107023", // !=
+								"107024", // !=
+								"107199", // !=
+								"107082", // !=
+								"107258", // ==
+								"107273", // Westbound South Fraser at Countess
+						})) //
+				.compileBothTripSort());
+		map2.put(16L, new RouteTripSpec(16L, //
+				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), //
+				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) //
+				.addTripSort(MDirectionType.EAST.intValue(), //
+						Arrays.asList(new String[] { //
+						"107080", // Downtown Exchange Bay B
+								"107400", // Southbound North Parallel at Whatcom
+						})) //
+				.addTripSort(MDirectionType.WEST.intValue(), //
+						Arrays.asList(new String[] { //
+						"107400", // Southbound North Parallel at Whatcom
+								"107080", // Downtown Exchange Bay B
+						})) //
+				.compileBothTripSort());
+		map2.put(23L, new RouteTripSpec(23L, //
+				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), // Bourquin Exchance
+				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) // Highstreet Mall
+				.addTripSort(MDirectionType.EAST.intValue(), //
+						Arrays.asList(new String[] { //
+						"120001", // != Highstreet Mall
+								"107115", // !=
+								"120002", // != Highstreet Mall Bay A
+								"105736", // !=
+								"107116", // ==
+								"107020", // Bourquin Exchange Bay E
+						})) //
+				.addTripSort(MDirectionType.WEST.intValue(), //
+						Arrays.asList(new String[] { //
+						"107501", // Bourquin Exchange Bay C
+								"107090", // ++
+								"107171", // ==
+								"107000", // !=
+								"120001", // != Highstreet Mall
+								"107172", // !=
+								"120002", // != Highstreet Mall Bay A
+						})) //
+				.compileBothTripSort());
+		map2.put(24L, new RouteTripSpec(24L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, "CW", // PM
+				1, MTrip.HEADSIGN_TYPE_STRING, "CCW") // AM
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"107500", // Bourquin Exchange Bay B
+								"107021", // ++
+								"107013", // ++
+								"107166", // ++
+								"107020", // Bourquin Exchange Bay E
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"107500", // Bourquin Exchange Bay B
+								"107122", // ++
+								"107303", // ++
+								"107085", // ++
+								"107499", // Bourquin Exchange Bay A
+						})) //
+				.compileBothTripSort());
+		map2.put(26L, new RouteTripSpec(26L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, SANDY_HILL, //
+				1, MTrip.HEADSIGN_TYPE_STRING, BOURQUIN_EXCHANGE) //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"108262", // Bourquin Exchange Bay D
+								"107039", // ==
+								"120016", // !=
+								"105727", // != Eastbound 34970 block Old Clayburn
+								"120017", // != Eastbound Sandy Hill at Old Clayburn => Bourquin Ex
+								"107040", // !=
+								"107048", // != Eastbound McKinley Drive at McKinley Place
+								"107049", // != Northbound McKinley at Sandy Hill
+								"107053", // != Southbound Old Clayburn at Sandy Hill => Bourquin Ex
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"120017", // != Eastbound Sandy Hill at Old Clayburn <= START
+								"107390", // Southbound McKee at Selkirk
+								"107067", // !=
+								"107053", // != Southbound Old Clayburn at Sandy Hill <= START
+								"107054", // != Southbound Old Clayburn at Burnside
+								"120015", // !=
+								"107068", // ==
+								"107085", // ==
+								"108262", // !+ Bourquin Exchange Bay D => Sandy Hl
+								"107499", // != Bourquin Exchange Bay A
+						})) //
+				.compileBothTripSort());
+		map2.put(34L, new RouteTripSpec(34L, //
+				MDirectionType.NORTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.NORTH.getId(), //
+				MDirectionType.SOUTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.SOUTH.getId()) //
+				.addTripSort(MDirectionType.NORTH.intValue(), //
+						Arrays.asList(new String[] { //
+						"107784", // == != Downtown Exchange Bay B
+								"107756", // != <>
+								"107819", // == !=
+								"107834", // Southbound Stave Lake at Dewdney Trunk
+						})) //
+				.addTripSort(MDirectionType.SOUTH.intValue(), //
+						Arrays.asList(new String[] { //
+						"107834", // Southbound Stave Lake at Dewdney Trunk
+								"107847", // == !=
+								"107756", // != <>
+								"107784", // == != Downtown Exchange Bay B
+						})) //
+				.compileBothTripSort());
+		map2.put(35L, new RouteTripSpec(35L, //
+				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), //
+				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) //
+				.addTripSort(MDirectionType.EAST.intValue(), //
+						Arrays.asList(new String[] { //
+						"107784", // Downtown Exchange Bay B
+								"107855", // Northbound Draper at Douglas
+						})) //
+				.addTripSort(MDirectionType.WEST.intValue(), //
+						Arrays.asList(new String[] { //
+						"107855", // Northbound Draper at Douglas
+								"107784", // Downtown Exchange Bay B
+						})) //
+				.compileBothTripSort());
+		ALL_ROUTE_TRIPS2 = map2;
+	}
+
+	@Override
+	public int compareEarly(long routeId, List<MTripStop> list1, List<MTripStop> list2, MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop) {
+		if (ALL_ROUTE_TRIPS2.containsKey(routeId)) {
+			return ALL_ROUTE_TRIPS2.get(routeId).compare(routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop);
+		}
+		return super.compareEarly(routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop);
+	}
+
+	@Override
+	public ArrayList<MTrip> splitTrip(MRoute mRoute, GTrip gTrip, GSpec gtfs) {
+		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
+			return ALL_ROUTE_TRIPS2.get(mRoute.getId()).getAllTrips();
+		}
+		return super.splitTrip(mRoute, gTrip, gtfs);
+	}
+
+	@Override
+	public Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, ArrayList<MTrip> splitTrips, GSpec routeGTFS) {
+		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
+			return SplitUtils.splitTripStop(mRoute, gTrip, gTripStop, routeGTFS, ALL_ROUTE_TRIPS2.get(mRoute.getId()));
+		}
+		return super.splitTripStop(mRoute, gTrip, gTripStop, splitTrips, routeGTFS);
+	}
 
 	@Override
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
-		if (mRoute.getId() == 1l) {
-			if (gTrip.getDirectionId() == 0 && gTrip.getTripHeadsign().contains("McKee")) {
-				mTrip.setHeadsignString("McKee", gTrip.getDirectionId());
-				return;
-			}
-			if (gTrip.getDirectionId() == 1 && gTrip.getTripHeadsign().contains(BLUERIDGE)) {
-				mTrip.setHeadsignString(BLUERIDGE, gTrip.getDirectionId());
-				return;
-			}
-		} else if (mRoute.getId() == 2l) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignDirection(MDirectionType.EAST);
-				return;
-			} else if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignDirection(MDirectionType.WEST);
-				return;
-			}
-		} else if (mRoute.getId() == 3l) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignDirection(MDirectionType.EAST);
-				return;
-			} else if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignDirection(MDirectionType.WEST);
-				return;
-			}
-		} else if (mRoute.getId() == 4l) {
-			if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
-				return;
-			}
-		} else if (mRoute.getId() == 5l) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignDirection(MDirectionType.EAST);
-				return;
-			} else if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignDirection(MDirectionType.WEST);
-				return;
-			}
-		} else if (mRoute.getId() == 6l) {
-			if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
-				return;
-			}
-		} else if (mRoute.getId() == 7l) {
-			if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
-				return;
-			}
-		} else if (mRoute.getId() == 12l) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignDirection(MDirectionType.NORTH);
-				return;
-			} else if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignDirection(MDirectionType.SOUTH);
-				return;
-			}
-		} else if (mRoute.getId() == 15l) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignString(DOWNTOWN_EX, gTrip.getDirectionId());
-				return;
-			} else if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignString(AUGUSTON, gTrip.getDirectionId());
-				return;
-			}
-		} else if (mRoute.getId() == 16l) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignDirection(MDirectionType.EAST);
-				return;
-			} else if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignDirection(MDirectionType.WEST);
-				return;
-			}
-		} else if (mRoute.getId() == 17l) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignString(CLOCK_WISE, gTrip.getDirectionId());
-				return;
-			}
-		} else if (mRoute.getId() == 21l) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignDirection(MDirectionType.EAST);
-				return;
-			} else if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignDirection(MDirectionType.WEST);
-				return;
-			}
-		} else if (mRoute.getId() == 22l) {
-			if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
-				return;
-			}
-		} else if (mRoute.getId() == 23l) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignString(CLOCK_WISE, gTrip.getDirectionId());
-				return;
-			} else if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
-				return;
-			}
-		} else if (mRoute.getId() == 24l) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignString(CLOCK_WISE, gTrip.getDirectionId());
-				return;
-			} else if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
-				return;
-			}
-		} else if (mRoute.getId() == 26l) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignInbound(MInboundType.INBOUND);
-				return;
-			} else if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignInbound(MInboundType.OUTBOUND);
-				return;
-			}
-		} else if (mRoute.getId() == 31l) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignString(MISSION, gTrip.getDirectionId());
-				return;
-			} else if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignString(ABBOTSFORD, gTrip.getDirectionId());
-				return;
-			}
-		} else if (mRoute.getId() == 32l) {
-			if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
-				return;
-			}
-		} else if (mRoute.getId() == 33l) {
-			if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
-				return;
-			}
-		} else if (mRoute.getId() == 34l) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignDirection(MDirectionType.NORTH);
-				return;
-			} else if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignDirection(MDirectionType.SOUTH);
-				return;
-			}
-		} else if (mRoute.getId() == 35l) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignString(DOWNTOWN_EX, gTrip.getDirectionId());
-				return;
-			} else if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignString(HATZIC, gTrip.getDirectionId());
-				return;
-			}
-		} else if (mRoute.getId() == 39l) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignString(CLOCK_WISE, gTrip.getDirectionId());
-				return;
-			}
-		} else if (mRoute.getId() == 40l) {
-			if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignString(COUNTER_CLOCK_WISE, gTrip.getDirectionId());
-				return;
-			}
+		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
+			return; // split
 		}
 		mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), gTrip.getDirectionId());
 	}
@@ -360,17 +378,55 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 		List<String> headsignsValues = Arrays.asList(mTrip.getHeadsignValue(), mTripToMerge.getHeadsignValue());
 		if (mTrip.getRouteId() == 1L) {
 			if (Arrays.asList( //
-					"BOURQUIN Ex", //
+					BOURQUIN_EXCHANGE, //
 					DOWNTOWN, //
 					BLUERIDGE //
 					).containsAll(headsignsValues)) {
 				mTrip.setHeadsignString(BLUERIDGE, mTrip.getHeadsignId());
 				return true;
 			} else if (Arrays.asList( //
-					"BOURQUIN Ex", //
-					"McKee" //
-			).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString("McKee", mTrip.getHeadsignId());
+					BOURQUIN_EXCHANGE, //
+					MC_KEE //
+					).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString(MC_KEE, mTrip.getHeadsignId());
+				return true;
+			}
+		} else if (mTrip.getRouteId() == 2L) {
+			if (Arrays.asList( //
+					BARRONS_WAY, //
+					BOURQUIN_EXCHANGE, //
+					HUNTINGDON //
+					).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString(HUNTINGDON, mTrip.getHeadsignId());
+				return true;
+			} else if (Arrays.asList( //
+					BLUEJAY, //
+					DOWNTOWN //
+					).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString(BLUEJAY, mTrip.getHeadsignId());
+				return true;
+			}
+		} else if (mTrip.getRouteId() == 3L) {
+			if (Arrays.asList( //
+					CLEARBROOK, //
+					BOURQUIN_EXCHANGE //
+					).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString(CLEARBROOK, mTrip.getHeadsignId());
+				return true;
+			} else if (Arrays.asList( //
+					UFV, //
+					BOURQUIN_EXCHANGE //
+					).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString(UFV, mTrip.getHeadsignId());
+				return true;
+			}
+		} else if (mTrip.getRouteId() == 4L) {
+			// TODO split
+			if (Arrays.asList( //
+					SADDLE, //
+					DOWNTOWN //
+					).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString(SADDLE, mTrip.getHeadsignId());
 				return true;
 			}
 		}
@@ -382,30 +438,30 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 		return false;
 	}
 
-	private static final Pattern EXCHANGE = Pattern.compile("(exchange)", Pattern.CASE_INSENSITIVE);
-	private static final String EXCHANGE_REPLACEMENT = "Ex";
+	private static final Pattern EXCHANGE = Pattern.compile("((^|\\W){1}(exchange)(\\W|$){1})", Pattern.CASE_INSENSITIVE);
+	private static final String EXCHANGE_REPLACEMENT = "$2" + EXCHANGE_SHORT + "$4";
+
+	private static final Pattern UFV_ = Pattern.compile("((^|\\W){1}(ufv)(\\W|$){1})", Pattern.CASE_INSENSITIVE);
+	private static final String UFV_REPLACEMENT = "$2UFV$4";
 
 	private static final Pattern STARTS_WITH_NUMBER = Pattern.compile("(^[\\d]+[\\S]*)", Pattern.CASE_INSENSITIVE);
+
+	private static final Pattern ENDS_WITH_CONNECTOR = Pattern.compile("( connector$)", Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern ENDS_WITH_VIA = Pattern.compile("( via .*$)", Pattern.CASE_INSENSITIVE);
 	private static final Pattern STARTS_WITH_TO = Pattern.compile("(^.* to )", Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern AND = Pattern.compile("( and )", Pattern.CASE_INSENSITIVE);
-	private static final String AND_REPLACEMENT = " & ";
-
-	private static final Pattern CLEAN_P1 = Pattern.compile("[\\s]*\\([\\s]*");
-	private static final String CLEAN_P1_REPLACEMENT = " (";
-	private static final Pattern CLEAN_P2 = Pattern.compile("[\\s]*\\)[\\s]*");
-	private static final String CLEAN_P2_REPLACEMENT = ") ";
-
 	@Override
 	public String cleanTripHeadsign(String tripHeadsign) {
+		if (Utils.isUppercaseOnly(tripHeadsign, true, true)) {
+			tripHeadsign = tripHeadsign.toLowerCase(Locale.ENGLISH);
+		}
 		tripHeadsign = EXCHANGE.matcher(tripHeadsign).replaceAll(EXCHANGE_REPLACEMENT);
+		tripHeadsign = UFV_.matcher(tripHeadsign).replaceAll(UFV_REPLACEMENT);
 		tripHeadsign = ENDS_WITH_VIA.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
 		tripHeadsign = STARTS_WITH_TO.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
-		tripHeadsign = AND.matcher(tripHeadsign).replaceAll(AND_REPLACEMENT);
-		tripHeadsign = CLEAN_P1.matcher(tripHeadsign).replaceAll(CLEAN_P1_REPLACEMENT);
-		tripHeadsign = CLEAN_P2.matcher(tripHeadsign).replaceAll(CLEAN_P2_REPLACEMENT);
+		tripHeadsign = ENDS_WITH_CONNECTOR.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
+		tripHeadsign = CleanUtils.CLEAN_AND.matcher(tripHeadsign).replaceAll(CleanUtils.CLEAN_AND_REPLACEMENT);
 		tripHeadsign = STARTS_WITH_NUMBER.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
 		tripHeadsign = CleanUtils.cleanStreetTypes(tripHeadsign);
 		return CleanUtils.cleanLabel(tripHeadsign);
