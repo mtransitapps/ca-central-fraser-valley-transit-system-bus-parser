@@ -28,8 +28,8 @@ import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MTrip;
 import org.mtransit.parser.mt.data.MTripStop;
 
-// https://bctransit.com/*/footer/open-data
-// https://bctransit.com/servlet/bctransit/data/GTFS - Central Fraser Valley
+// https://www.bctransit.com/open-data
+// https://www.bctransit.com/data/gtfs/central-fraser-valley.zip
 public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgencyTools {
 
 	public static void main(String[] args) {
