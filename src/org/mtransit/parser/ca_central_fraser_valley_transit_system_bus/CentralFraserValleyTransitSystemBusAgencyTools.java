@@ -112,6 +112,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 	}
 
 	private static final String AGENCY_COLOR_GREEN = "34B233";// GREEN (from PDF Corporate Graphic Standards)
+	@SuppressWarnings("unused")
 	private static final String AGENCY_COLOR_BLUE = "002C77"; // BLUE (from PDF Corporate Graphic Standards)
 
 	private static final String AGENCY_COLOR = AGENCY_COLOR_GREEN;
@@ -177,9 +178,6 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 			case 66: return COLOR_0D4D8B;
 			// @formatter:on
 			default:
-				if (isGoodEnoughAccepted()) {
-					return AGENCY_COLOR_BLUE;
-				}
 				System.out.printf("\n%s: Unexpected route color: %s!\n", gRoute);
 				System.exit(-1);
 				return null;
@@ -398,17 +396,19 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 			}
 		} else if (mTrip.getRouteId() == 2L) {
 			if (Arrays.asList( //
+					BOURQUIN_EXCHANGE, // <>
+					BLUEJAY //
+					).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString(BLUEJAY, mTrip.getHeadsignId());
+				return true;
+			}
+			if (Arrays.asList( //
+					BLUEJAY, // <>
+					BOURQUIN_EXCHANGE, // <>
 					BARRONS_WAY, //
-					BOURQUIN_EXCHANGE, //
 					HUNTINGDON //
 					).containsAll(headsignsValues)) {
 				mTrip.setHeadsignString(HUNTINGDON, mTrip.getHeadsignId());
-				return true;
-			} else if (Arrays.asList( //
-					BLUEJAY, //
-					DOWNTOWN //
-					).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString(BLUEJAY, mTrip.getHeadsignId());
 				return true;
 			}
 		} else if (mTrip.getRouteId() == 3L) {
@@ -434,9 +434,6 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				mTrip.setHeadsignString(SADDLE, mTrip.getHeadsignId());
 				return true;
 			}
-		}
-		if (isGoodEnoughAccepted()) {
-			return super.mergeHeadsign(mTrip, mTripToMerge);
 		}
 		System.out.printf("\n%s: Unexpected trips to merge: %s & %s!\n", mTrip.getRouteId(), mTrip, mTripToMerge);
 		System.exit(-1);
