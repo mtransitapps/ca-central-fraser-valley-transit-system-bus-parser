@@ -159,6 +159,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 			case 5: return COLOR_A54499;
 			case 6: return COLOR_00AEEF;
 			case 7: return COLOR_00AA4F;
+			case 9: return null; // TODO?
 			case 12: return COLOR_0073AE;
 			case 15: return COLOR_49176D;
 			case 16: return COLOR_B3AA7E;
@@ -178,7 +179,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 			case 66: return COLOR_0D4D8B;
 			// @formatter:on
 			default:
-				System.out.printf("\n%s: Unexpected route color: %s!\n", gRoute);
+				System.out.printf("\n%s: Unexpected route color: %s!\n", gRoute.getRouteId(), gRoute);
 				System.exit(-1);
 				return null;
 			}
@@ -189,16 +190,14 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 	private static final String EXCHANGE_SHORT = "Exch";
 
 	private static final String BOURQUIN_EXCHANGE = "Bourquin " + EXCHANGE_SHORT;
-	private static final String BLUERIDGE = "Blueridge";
-	private static final String DOWNTOWN = "Downtown";
-	private static final String BLUEJAY = "Bluejay";
-	private static final String HUNTINGDON = "Huntingdon";
-	private static final String BARRONS_WAY = "Barrons Way";
-	private static final String MC_KEE = "McKee";
-	private static final String UFV = "UFV";
 	private static final String CLEARBROOK = "Clearbrook";
+	private static final String DOWNTOWN = "Downtown";
+	private static final String HUNTINGDON = "Huntingdon";
+	private static final String MC_MILLAN = "McMillan";
 	private static final String SADDLE = "Saddle";
 	private static final String SANDY_HILL = "Sandy Hl";
+	private static final String SUMAS_CTR = "Sumas Ctr";
+	private static final String UFV = "UFV";
 
 	private static HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
 	static {
@@ -382,47 +381,32 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 		if (mTrip.getRouteId() == 1L) {
 			if (Arrays.asList( //
 					BOURQUIN_EXCHANGE, //
-					DOWNTOWN, //
-					BLUERIDGE //
+					UFV //
 					).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString(BLUERIDGE, mTrip.getHeadsignId());
-				return true;
-			} else if (Arrays.asList( //
-					BOURQUIN_EXCHANGE, //
-					MC_KEE //
-					).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString(MC_KEE, mTrip.getHeadsignId());
+				mTrip.setHeadsignString(UFV, mTrip.getHeadsignId());
 				return true;
 			}
 		} else if (mTrip.getRouteId() == 2L) {
 			if (Arrays.asList( //
 					BOURQUIN_EXCHANGE, // <>
-					BLUEJAY //
+					MC_MILLAN //
 					).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString(BLUEJAY, mTrip.getHeadsignId());
-				return true;
-			}
-			if (Arrays.asList( //
-					BLUEJAY, // <>
-					BOURQUIN_EXCHANGE, // <>
-					BARRONS_WAY, //
-					HUNTINGDON //
-					).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString(HUNTINGDON, mTrip.getHeadsignId());
+				mTrip.setHeadsignString(MC_MILLAN, mTrip.getHeadsignId());
 				return true;
 			}
 		} else if (mTrip.getRouteId() == 3L) {
 			if (Arrays.asList( //
-					CLEARBROOK, //
-					BOURQUIN_EXCHANGE //
+					SUMAS_CTR, // <>
+					CLEARBROOK //
 					).containsAll(headsignsValues)) {
 				mTrip.setHeadsignString(CLEARBROOK, mTrip.getHeadsignId());
 				return true;
-			} else if (Arrays.asList( //
-					UFV, //
-					BOURQUIN_EXCHANGE //
+			}
+			if (Arrays.asList( //
+					SUMAS_CTR, // <>
+					HUNTINGDON //
 					).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString(UFV, mTrip.getHeadsignId());
+				mTrip.setHeadsignString(HUNTINGDON, mTrip.getHeadsignId());
 				return true;
 			}
 		} else if (mTrip.getRouteId() == 4L) {
@@ -432,6 +416,14 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 					DOWNTOWN //
 					).containsAll(headsignsValues)) {
 				mTrip.setHeadsignString(SADDLE, mTrip.getHeadsignId());
+				return true;
+			}
+		} else if (mTrip.getRouteId() == 9L) {
+			if (Arrays.asList( //
+					BOURQUIN_EXCHANGE, //
+					DOWNTOWN //
+					).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString(DOWNTOWN, mTrip.getHeadsignId());
 				return true;
 			}
 		}
@@ -451,7 +443,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 	private static final Pattern ENDS_WITH_CONNECTOR = Pattern.compile("( connector$)", Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern ENDS_WITH_VIA = Pattern.compile("( via .*$)", Pattern.CASE_INSENSITIVE);
-	private static final Pattern STARTS_WITH_TO = Pattern.compile("(^.* to )", Pattern.CASE_INSENSITIVE);
+	private static final Pattern STARTS_WITH_TO = Pattern.compile("(^.*( )?to )", Pattern.CASE_INSENSITIVE);
 
 	@Override
 	public String cleanTripHeadsign(String tripHeadsign) {
