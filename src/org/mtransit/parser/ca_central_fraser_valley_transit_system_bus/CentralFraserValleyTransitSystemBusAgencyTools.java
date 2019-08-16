@@ -426,6 +426,22 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				mTrip.setHeadsignString(DOWNTOWN, mTrip.getHeadsignId());
 				return true;
 			}
+		} else if (mTrip.getRouteId() == 31L) {
+			if (Arrays.asList( //
+					"Matsqui Vlg", //
+					"Bourquin Exch" //
+			).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString("Bourquin Exch", mTrip.getHeadsignId());
+				return true;
+			}
+		} else if (mTrip.getRouteId() == 40L) {
+			if (Arrays.asList( //
+					"East Mission Night Route", //
+					"East Side Night Route" //
+			).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString("East Side Night Route", mTrip.getHeadsignId());
+				return true;
+			}
 		}
 		System.out.printf("\n%s: Unexpected trips to merge: %s & %s!\n", mTrip.getRouteId(), mTrip, mTripToMerge);
 		System.exit(-1);
@@ -438,12 +454,11 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 	private static final Pattern UFV_ = Pattern.compile("((^|\\W){1}(ufv)(\\W|$){1})", Pattern.CASE_INSENSITIVE);
 	private static final String UFV_REPLACEMENT = "$2UFV$4";
 
-	private static final Pattern STARTS_WITH_NUMBER = Pattern.compile("(^[\\d]+[\\S]*)", Pattern.CASE_INSENSITIVE);
-
 	private static final Pattern ENDS_WITH_CONNECTOR = Pattern.compile("( connector$)", Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern ENDS_WITH_VIA = Pattern.compile("( via .*$)", Pattern.CASE_INSENSITIVE);
 	private static final Pattern STARTS_WITH_TO = Pattern.compile("(^.*( )?to )", Pattern.CASE_INSENSITIVE);
+	private static final Pattern STARTS_WITH_DASH = Pattern.compile("(^.*( )?\\- )", Pattern.CASE_INSENSITIVE);
 
 	@Override
 	public String cleanTripHeadsign(String tripHeadsign) {
@@ -454,9 +469,9 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 		tripHeadsign = UFV_.matcher(tripHeadsign).replaceAll(UFV_REPLACEMENT);
 		tripHeadsign = ENDS_WITH_VIA.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
 		tripHeadsign = STARTS_WITH_TO.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
+		tripHeadsign = STARTS_WITH_DASH.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
 		tripHeadsign = ENDS_WITH_CONNECTOR.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
 		tripHeadsign = CleanUtils.CLEAN_AND.matcher(tripHeadsign).replaceAll(CleanUtils.CLEAN_AND_REPLACEMENT);
-		tripHeadsign = STARTS_WITH_NUMBER.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
 		tripHeadsign = CleanUtils.cleanStreetTypes(tripHeadsign);
 		return CleanUtils.cleanLabel(tripHeadsign);
 	}
