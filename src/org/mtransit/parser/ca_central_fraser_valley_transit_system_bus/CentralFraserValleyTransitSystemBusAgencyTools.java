@@ -197,6 +197,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 	private static final String SADDLE = "Saddle";
 	private static final String SANDY_HILL = "Sandy Hl";
 	private static final String SUMAS_CTR = "Sumas Ctr";
+	private static final String SUMAS_MTN = "Sumas Mtn";
 	private static final String UFV = "UFV";
 
 	private static HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
@@ -412,10 +413,26 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 		} else if (mTrip.getRouteId() == 4L) {
 			// TODO split
 			if (Arrays.asList( //
-					SADDLE, //
-					DOWNTOWN //
+					DOWNTOWN, //
+					SADDLE //
 					).containsAll(headsignsValues)) {
 				mTrip.setHeadsignString(SADDLE, mTrip.getHeadsignId());
+				return true;
+			}
+			if (Arrays.asList( //
+					BOURQUIN_EXCHANGE, //
+					SADDLE //
+					).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString(SADDLE, mTrip.getHeadsignId());
+				return true;
+			}
+		} else if (mTrip.getRouteId() == 7L) {
+			if (Arrays.asList( //
+					BOURQUIN_EXCHANGE, //
+					DOWNTOWN, //
+					SUMAS_MTN //
+					).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString(SUMAS_MTN, mTrip.getHeadsignId());
 				return true;
 			}
 		} else if (mTrip.getRouteId() == 9L) {
