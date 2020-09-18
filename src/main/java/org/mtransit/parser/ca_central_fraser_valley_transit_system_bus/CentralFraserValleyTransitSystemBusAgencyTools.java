@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.DefaultAgencyTools;
+import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Pair;
 import org.mtransit.parser.SplitUtils;
 import org.mtransit.parser.SplitUtils.RouteTripSpec;
@@ -46,11 +47,11 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 
 	@Override
 	public void start(String[] args) {
-		System.out.printf("\nGenerating CFV Transit System bus data...");
+		MTLog.log("Generating CFV Transit System bus data...");
 		long start = System.currentTimeMillis();
 		this.serviceIds = extractUsefulServiceIds(args, this, true);
 		super.start(args);
-		System.out.printf("\nGenerating CFV Transit System bus data... DONE in %s.\n", Utils.getPrettyDuration(System.currentTimeMillis() - start));
+		MTLog.log("Generating CFV Transit System bus data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 
 	@Override
@@ -179,9 +180,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 			case 66: return COLOR_0D4D8B;
 			// @formatter:on
 			default:
-				System.out.printf("\n%s: Unexpected route color: %s!\n", gRoute.getRouteId(), gRoute);
-				System.exit(-1);
-				return null;
+				throw new MTLog.Fatal("%s: Unexpected route color: %s!", gRoute.getRouteId(), gRoute);
 			}
 		}
 		return super.getRouteColor(gRoute);
@@ -202,17 +201,17 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 
 	private static HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
 	static {
-		HashMap<Long, RouteTripSpec> map2 = new HashMap<Long, RouteTripSpec>();
+		HashMap<Long, RouteTripSpec> map2 = new HashMap<>();
 		map2.put(5L, new RouteTripSpec(5L, //
 				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), //
 				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) //
 				.addTripSort(MDirectionType.EAST.intValue(), //
-						Arrays.asList(new String[] { //
+						Arrays.asList( //
 						"107273", // Westbound South Fraser at Countess
-								"107499", // Bourquin Exchange Bay A
-						})) //
+								"107499" // Bourquin Exchange Bay A
+						)) //
 				.addTripSort(MDirectionType.WEST.intValue(), //
-						Arrays.asList(new String[] { //
+						Arrays.asList( //
 						"108262", // Bourquin Exchange Bay D
 								"107022", // ==
 								"107023", // !=
@@ -220,71 +219,71 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 								"107199", // !=
 								"107082", // !=
 								"107258", // ==
-								"107273", // Westbound South Fraser at Countess
-						})) //
+								"107273" // Westbound South Fraser at Countess
+						)) //
 				.compileBothTripSort());
 		map2.put(16L, new RouteTripSpec(16L, //
 				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), //
 				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) //
 				.addTripSort(MDirectionType.EAST.intValue(), //
-						Arrays.asList(new String[] { //
+						Arrays.asList( //
 						"107080", // Downtown Exchange Bay B
-								"107400", // Southbound North Parallel at Whatcom
-						})) //
+								"107400" // Southbound North Parallel at Whatcom
+						)) //
 				.addTripSort(MDirectionType.WEST.intValue(), //
-						Arrays.asList(new String[] { //
+						Arrays.asList( //
 						"107400", // Southbound North Parallel at Whatcom
-								"107080", // Downtown Exchange Bay B
-						})) //
+								"107080" // Downtown Exchange Bay B
+						)) //
 				.compileBothTripSort());
 		map2.put(23L, new RouteTripSpec(23L, //
 				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), // Bourquin Exchance
 				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) // Highstreet Mall
 				.addTripSort(MDirectionType.EAST.intValue(), //
-						Arrays.asList(new String[] { //
+						Arrays.asList( //
 						"120001", // != Highstreet Mall
 								"107115", // !=
 								"120002", // != Highstreet Mall Bay A
 								"105736", // !=
 								"107116", // ==
-								"107020", // Bourquin Exchange Bay E
-						})) //
+								"107020" // Bourquin Exchange Bay E
+						)) //
 				.addTripSort(MDirectionType.WEST.intValue(), //
-						Arrays.asList(new String[] { //
+						Arrays.asList( //
 						"107501", // Bourquin Exchange Bay C
 								"107090", // ++
 								"107171", // ==
 								"107000", // !=
 								"120001", // != Highstreet Mall
 								"107172", // !=
-								"120002", // != Highstreet Mall Bay A
-						})) //
+								"120002" // != Highstreet Mall Bay A
+						)) //
 				.compileBothTripSort());
 		map2.put(24L, new RouteTripSpec(24L, //
 				0, MTrip.HEADSIGN_TYPE_STRING, "CW", // PM
 				1, MTrip.HEADSIGN_TYPE_STRING, "CCW") // AM
 				.addTripSort(0, //
-						Arrays.asList(new String[] { //
+						Arrays.asList( //
 						"107500", // Bourquin Exchange Bay B
 								"107021", // ++
 								"107013", // ++
 								"107166", // ++
-								"107020", // Bourquin Exchange Bay E
-						})) //
+								"107020" // Bourquin Exchange Bay E
+						)) //
 				.addTripSort(1, //
-						Arrays.asList(new String[] { //
+						Arrays.asList( //
 						"107500", // Bourquin Exchange Bay B
 								"107122", // ++
 								"107303", // ++
 								"107085", // ++
-								"107499", // Bourquin Exchange Bay A
-						})) //
+								"107499" // Bourquin Exchange Bay A
+						)) //
 				.compileBothTripSort());
 		map2.put(26L, new RouteTripSpec(26L, //
 				0, MTrip.HEADSIGN_TYPE_STRING, SANDY_HILL, //
 				1, MTrip.HEADSIGN_TYPE_STRING, BOURQUIN_EXCHANGE) //
 				.addTripSort(0, //
-						Arrays.asList(new String[] { //
+						Arrays.asList( //
 						"108262", // Bourquin Exchange Bay D
 								"107039", // ==
 								"120016", // !=
@@ -293,10 +292,10 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 								"107040", // !=
 								"107048", // != Eastbound McKinley Drive at McKinley Place
 								"107049", // != Northbound McKinley at Sandy Hill
-								"107053", // != Southbound Old Clayburn at Sandy Hill => Bourquin Ex
-						})) //
+								"107053" // != Southbound Old Clayburn at Sandy Hill => Bourquin Ex
+						)) //
 				.addTripSort(1, //
-						Arrays.asList(new String[] { //
+						Arrays.asList( //
 						"120017", // != Eastbound Sandy Hill at Old Clayburn <= START
 								"107390", // Southbound McKee at Selkirk
 								"107067", // !=
@@ -306,40 +305,40 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 								"107068", // ==
 								"107085", // ==
 								"108262", // !+ Bourquin Exchange Bay D => Sandy Hl
-								"107499", // != Bourquin Exchange Bay A
-						})) //
+								"107499" // != Bourquin Exchange Bay A
+						)) //
 				.compileBothTripSort());
 		map2.put(34L, new RouteTripSpec(34L, //
 				MDirectionType.NORTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.NORTH.getId(), //
 				MDirectionType.SOUTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.SOUTH.getId()) //
 				.addTripSort(MDirectionType.NORTH.intValue(), //
-						Arrays.asList(new String[] { //
+						Arrays.asList( //
 						"107784", // == != Downtown Exchange Bay B
 								"107756", // != <>
 								"107819", // == !=
-								"107834", // Southbound Stave Lake at Dewdney Trunk
-						})) //
+								"107834" // Southbound Stave Lake at Dewdney Trunk
+						)) //
 				.addTripSort(MDirectionType.SOUTH.intValue(), //
-						Arrays.asList(new String[] { //
+						Arrays.asList( //
 						"107834", // Southbound Stave Lake at Dewdney Trunk
 								"107847", // == !=
 								"107756", // != <>
-								"107784", // == != Downtown Exchange Bay B
-						})) //
+								"107784" // == != Downtown Exchange Bay B
+						)) //
 				.compileBothTripSort());
 		map2.put(35L, new RouteTripSpec(35L, //
 				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), //
 				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) //
 				.addTripSort(MDirectionType.EAST.intValue(), //
-						Arrays.asList(new String[] { //
+						Arrays.asList( //
 						"107784", // Downtown Exchange Bay B
-								"107855", // Northbound Draper at Douglas
-						})) //
+								"107855" // Northbound Draper at Douglas
+						)) //
 				.addTripSort(MDirectionType.WEST.intValue(), //
-						Arrays.asList(new String[] { //
+						Arrays.asList( //
 						"107855", // Northbound Draper at Douglas
-								"107784", // Downtown Exchange Bay B
-						})) //
+								"107784" // Downtown Exchange Bay B
+						)) //
 				.compileBothTripSort());
 		ALL_ROUTE_TRIPS2 = map2;
 	}
@@ -451,6 +450,14 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				mTrip.setHeadsignString("Bourquin Exch", mTrip.getHeadsignId());
 				return true;
 			}
+		} else if (mTrip.getRouteId() == 33L) {
+			if (Arrays.asList( //
+					"Counterclockwise", //
+					"Cedar Vly" //
+			).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString("Cedar Vly", mTrip.getHeadsignId());
+				return true;
+			}
 		} else if (mTrip.getRouteId() == 40L) {
 			if (Arrays.asList( //
 					"East Mission Night Route", //
@@ -460,9 +467,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				return true;
 			}
 		}
-		System.out.printf("\n%s: Unexpected trips to merge: %s & %s!\n", mTrip.getRouteId(), mTrip, mTripToMerge);
-		System.exit(-1);
-		return false;
+		throw new MTLog.Fatal("%s: Unexpected trips to merge: %s & %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
 	}
 
 	private static final Pattern EXCHANGE = Pattern.compile("((^|\\W){1}(exchange)(\\W|$){1})", Pattern.CASE_INSENSITIVE);
@@ -473,8 +478,6 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 
 	private static final Pattern ENDS_WITH_CONNECTOR = Pattern.compile("( connector$)", Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern ENDS_WITH_VIA = Pattern.compile("( via .*$)", Pattern.CASE_INSENSITIVE);
-	private static final Pattern STARTS_WITH_TO = Pattern.compile("(^.*( )?to )", Pattern.CASE_INSENSITIVE);
 	private static final Pattern STARTS_WITH_DASH = Pattern.compile("(^.*( )?\\- )", Pattern.CASE_INSENSITIVE);
 
 	@Override
@@ -484,8 +487,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 		}
 		tripHeadsign = EXCHANGE.matcher(tripHeadsign).replaceAll(EXCHANGE_REPLACEMENT);
 		tripHeadsign = UFV_.matcher(tripHeadsign).replaceAll(UFV_REPLACEMENT);
-		tripHeadsign = ENDS_WITH_VIA.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
-		tripHeadsign = STARTS_WITH_TO.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
+		tripHeadsign = CleanUtils.keepToAndRemoveVia(tripHeadsign);
 		tripHeadsign = STARTS_WITH_DASH.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
 		tripHeadsign = ENDS_WITH_CONNECTOR.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
 		tripHeadsign = CleanUtils.CLEAN_AND.matcher(tripHeadsign).replaceAll(CleanUtils.CLEAN_AND_REPLACEMENT);
@@ -493,11 +495,9 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 		return CleanUtils.cleanLabel(tripHeadsign);
 	}
 
-	private static final Pattern STARTS_WITH_BOUND = Pattern.compile("(^(east|west|north|south)bound)", Pattern.CASE_INSENSITIVE);
-
 	@Override
 	public String cleanStopName(String gStopName) {
-		gStopName = STARTS_WITH_BOUND.matcher(gStopName).replaceAll(StringUtils.EMPTY);
+		gStopName = CleanUtils.cleanBounds(gStopName);
 		gStopName = CleanUtils.CLEAN_AT.matcher(gStopName).replaceAll(CleanUtils.CLEAN_AT_REPLACEMENT);
 		gStopName = EXCHANGE.matcher(gStopName).replaceAll(EXCHANGE_REPLACEMENT);
 		gStopName = CleanUtils.cleanStreetTypes(gStopName);
