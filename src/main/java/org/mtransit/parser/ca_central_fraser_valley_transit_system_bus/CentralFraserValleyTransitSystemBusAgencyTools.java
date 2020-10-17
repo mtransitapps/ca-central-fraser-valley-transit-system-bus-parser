@@ -202,64 +202,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 	private static HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
 	static {
 		HashMap<Long, RouteTripSpec> map2 = new HashMap<>();
-		map2.put(5L, new RouteTripSpec(5L, //
-				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), //
-				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) //
-				.addTripSort(MDirectionType.EAST.intValue(), //
-						Arrays.asList( //
-						"107273", // Westbound South Fraser at Countess
-								"107499" // Bourquin Exchange Bay A
-						)) //
-				.addTripSort(MDirectionType.WEST.intValue(), //
-						Arrays.asList( //
-						"108262", // Bourquin Exchange Bay D
-								"107022", // ==
-								"107023", // !=
-								"107024", // !=
-								"107199", // !=
-								"107082", // !=
-								"107258", // ==
-								"107273" // Westbound South Fraser at Countess
-						)) //
-				.compileBothTripSort());
-		map2.put(16L, new RouteTripSpec(16L, //
-				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), //
-				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) //
-				.addTripSort(MDirectionType.EAST.intValue(), //
-						Arrays.asList( //
-						"107080", // Downtown Exchange Bay B
-								"107400" // Southbound North Parallel at Whatcom
-						)) //
-				.addTripSort(MDirectionType.WEST.intValue(), //
-						Arrays.asList( //
-						"107400", // Southbound North Parallel at Whatcom
-								"107080" // Downtown Exchange Bay B
-						)) //
-				.compileBothTripSort());
-		map2.put(23L, new RouteTripSpec(23L, //
-				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), // Bourquin Exchance
-				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) // Highstreet Mall
-				.addTripSort(MDirectionType.EAST.intValue(), //
-						Arrays.asList( //
-						"120001", // != Highstreet Mall
-								"107115", // !=
-								"120002", // != Highstreet Mall Bay A
-								"105736", // !=
-								"107116", // ==
-								"107020" // Bourquin Exchange Bay E
-						)) //
-				.addTripSort(MDirectionType.WEST.intValue(), //
-						Arrays.asList( //
-						"107501", // Bourquin Exchange Bay C
-								"107090", // ++
-								"107171", // ==
-								"107000", // !=
-								"120001", // != Highstreet Mall
-								"107172", // !=
-								"120002" // != Highstreet Mall Bay A
-						)) //
-				.compileBothTripSort());
-		map2.put(24L, new RouteTripSpec(24L, //
+		map2.put(24L, new RouteTripSpec(24L, // BECAUSE same head-sign for 2 differents trip direction
 				0, MTrip.HEADSIGN_TYPE_STRING, "CW", // PM
 				1, MTrip.HEADSIGN_TYPE_STRING, "CCW") // AM
 				.addTripSort(0, //
@@ -268,7 +211,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 								"107021", // ++
 								"107013", // ++
 								"107166", // ++
-								"107020" // Bourquin Exchange Bay E
+								"107500" // Bourquin Exchange Bay B
 						)) //
 				.addTripSort(1, //
 						Arrays.asList( //
@@ -276,10 +219,10 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 								"107122", // ++
 								"107303", // ++
 								"107085", // ++
-								"107499" // Bourquin Exchange Bay A
+								"107500" // Bourquin Exchange Bay B
 						)) //
 				.compileBothTripSort());
-		map2.put(26L, new RouteTripSpec(26L, //
+		map2.put(26L, new RouteTripSpec(26L, // BECAUSE same head-sign for 2 differents trip direction
 				0, MTrip.HEADSIGN_TYPE_STRING, SANDY_HILL, //
 				1, MTrip.HEADSIGN_TYPE_STRING, BOURQUIN_EXCHANGE) //
 				.addTripSort(0, //
@@ -308,7 +251,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 								"107499" // != Bourquin Exchange Bay A
 						)) //
 				.compileBothTripSort());
-		map2.put(34L, new RouteTripSpec(34L, //
+		map2.put(34L, new RouteTripSpec(34L, // BECAUSE same head-sign for 2 differents trip direction
 				MDirectionType.NORTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.NORTH.getId(), //
 				MDirectionType.SOUTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.SOUTH.getId()) //
 				.addTripSort(MDirectionType.NORTH.intValue(), //
@@ -326,7 +269,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 								"107784" // == != Downtown Exchange Bay B
 						)) //
 				.compileBothTripSort());
-		map2.put(35L, new RouteTripSpec(35L, //
+		map2.put(35L, new RouteTripSpec(35L, // BECAUSE same head-sign for 2 differents trip direction
 				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), //
 				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) //
 				.addTripSort(MDirectionType.EAST.intValue(), //
@@ -410,16 +353,10 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 				return true;
 			}
 		} else if (mTrip.getRouteId() == 4L) {
-			// TODO split
 			if (Arrays.asList( //
-					DOWNTOWN, //
-					SADDLE //
-					).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString(SADDLE, mTrip.getHeadsignId());
-				return true;
-			}
-			if (Arrays.asList( //
+					"Counterclockwise", //
 					BOURQUIN_EXCHANGE, //
+					DOWNTOWN, //
 					SADDLE //
 					).containsAll(headsignsValues)) {
 				mTrip.setHeadsignString(SADDLE, mTrip.getHeadsignId());
