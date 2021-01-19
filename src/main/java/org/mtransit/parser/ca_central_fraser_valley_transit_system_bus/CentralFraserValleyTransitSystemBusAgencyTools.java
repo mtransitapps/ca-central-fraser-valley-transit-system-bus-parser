@@ -1,20 +1,14 @@
 package org.mtransit.parser.ca_central_fraser_valley_transit_system_bus;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Pair;
 import org.mtransit.parser.SplitUtils;
 import org.mtransit.parser.SplitUtils.RouteTripSpec;
+import org.mtransit.parser.StringUtils;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
@@ -29,11 +23,20 @@ import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MTrip;
 import org.mtransit.parser.mt.data.MTripStop;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import static org.mtransit.parser.StringUtils.EMPTY;
+
 // https://www.bctransit.com/open-data
 // https://www.bctransit.com/data/gtfs/central-fraser-valley.zip
 public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgencyTools {
 
-	public static void main(String[] args) {
+	public static void main(@Nullable String[] args) {
 		if (args == null || args.length == 0) {
 			args = new String[3];
 			args[0] = "input/gtfs.zip";
@@ -43,34 +46,35 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 		new CentralFraserValleyTransitSystemBusAgencyTools().start(args);
 	}
 
-	private HashSet<String> serviceIds;
+	@Nullable
+	private HashSet<Integer> serviceIdInts;
 
 	@Override
-	public void start(String[] args) {
+	public void start(@NotNull String[] args) {
 		MTLog.log("Generating CFV Transit System bus data...");
 		long start = System.currentTimeMillis();
-		this.serviceIds = extractUsefulServiceIds(args, this, true);
+		this.serviceIdInts = extractUsefulServiceIdInts(args, this, true);
 		super.start(args);
 		MTLog.log("Generating CFV Transit System bus data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 
 	@Override
 	public boolean excludingAll() {
-		return this.serviceIds != null && this.serviceIds.isEmpty();
+		return this.serviceIdInts != null && this.serviceIdInts.isEmpty();
 	}
 
 	@Override
-	public boolean excludeCalendar(GCalendar gCalendar) {
-		if (this.serviceIds != null) {
-			return excludeUselessCalendar(gCalendar, this.serviceIds);
+	public boolean excludeCalendar(@NotNull GCalendar gCalendar) {
+		if (this.serviceIdInts != null) {
+			return excludeUselessCalendarInt(gCalendar, this.serviceIdInts);
 		}
 		return super.excludeCalendar(gCalendar);
 	}
 
 	@Override
-	public boolean excludeCalendarDate(GCalendarDate gCalendarDates) {
-		if (this.serviceIds != null) {
-			return excludeUselessCalendarDate(gCalendarDates, this.serviceIds);
+	public boolean excludeCalendarDate(@NotNull GCalendarDate gCalendarDates) {
+		if (this.serviceIdInts != null) {
+			return excludeUselessCalendarDateInt(gCalendarDates, this.serviceIdInts);
 		}
 		return super.excludeCalendarDate(gCalendarDates);
 	}
@@ -78,7 +82,8 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 	private static final String INCLUDE_AGENCY_ID = "6"; // CFV Transit System only
 
 	@Override
-	public boolean excludeRoute(GRoute gRoute) {
+	public boolean excludeRoute(@NotNull GRoute gRoute) {
+		//noinspection deprecation
 		if (!INCLUDE_AGENCY_ID.equals(gRoute.getAgencyId())) {
 			return true;
 		}
@@ -86,26 +91,28 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 	}
 
 	@Override
-	public boolean excludeTrip(GTrip gTrip) {
-		if (this.serviceIds != null) {
-			return excludeUselessTrip(gTrip, this.serviceIds);
+	public boolean excludeTrip(@NotNull GTrip gTrip) {
+		if (this.serviceIdInts != null) {
+			return excludeUselessTripInt(gTrip, this.serviceIdInts);
 		}
 		return super.excludeTrip(gTrip);
 	}
 
+	@NotNull
 	@Override
 	public Integer getAgencyRouteType() {
 		return MAgency.ROUTE_TYPE_BUS;
 	}
 
 	@Override
-	public long getRouteId(GRoute gRoute) {
+	public long getRouteId(@NotNull GRoute gRoute) {
 		return Long.parseLong(gRoute.getRouteShortName()); // use route short name as route ID
 	}
 
+	@NotNull
 	@Override
-	public String getRouteLongName(GRoute gRoute) {
-		String routeLongName = gRoute.getRouteLongName();
+	public String getRouteLongName(@NotNull GRoute gRoute) {
+		String routeLongName = gRoute.getRouteLongNameOrDefault();
 		routeLongName = CleanUtils.cleanSlashes(routeLongName);
 		routeLongName = CleanUtils.cleanNumbers(routeLongName);
 		routeLongName = CleanUtils.cleanStreetTypes(routeLongName);
@@ -113,74 +120,52 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 	}
 
 	private static final String AGENCY_COLOR_GREEN = "34B233";// GREEN (from PDF Corporate Graphic Standards)
-	@SuppressWarnings("unused")
-	private static final String AGENCY_COLOR_BLUE = "002C77"; // BLUE (from PDF Corporate Graphic Standards)
+	// private static final String AGENCY_COLOR_BLUE = "002C77"; // BLUE (from PDF Corporate Graphic Standards)
 
 	private static final String AGENCY_COLOR = AGENCY_COLOR_GREEN;
 
+	@NotNull
 	@Override
 	public String getAgencyColor() {
 		return AGENCY_COLOR;
 	}
 
-	private static final String COLOR_8CC63F = "8CC63F";
-	private static final String COLOR_8077B6 = "8077B6";
-	private static final String COLOR_F8931E = "F8931E";
-	private static final String COLOR_AC5C3B = "AC5C3B";
-	private static final String COLOR_A54499 = "A54499";
-	private static final String COLOR_00AEEF = "00AEEF";
-	private static final String COLOR_00AA4F = "00AA4F";
-	private static final String COLOR_0073AE = "0073AE";
-	private static final String COLOR_B3AA7E = "B3AA7E";
-	private static final String COLOR_77AE99 = "77AE99";
-	private static final String COLOR_7C3F25 = "7C3F25";
-	private static final String COLOR_FFC20E = "FFC20E";
-	private static final String COLOR_A3BADC = "A3BADC";
-	private static final String COLOR_ED1D8F = "ED1D8F";
-	private static final String COLOR_F49AC1 = "F49AC1";
-	private static final String COLOR_BF83B9 = "BF83B9";
-	private static final String COLOR_EC1D8D = "EC1D8D";
-	private static final String COLOR_367D0F = "367D0F";
-	private static final String COLOR_FFC10E = "FFC10E";
-	private static final String COLOR_F78B1F = "F78B1F";
-	private static final String COLOR_0073AD = "0073AD";
-	private static final String COLOR_49176D = "49176D";
-	private static final String COLOR_0D4D8B = "0D4D8B";
-
+	@SuppressWarnings("DuplicateBranchesInSwitch")
+	@Nullable
 	@Override
-	public String getRouteColor(GRoute gRoute) {
+	public String getRouteColor(@NotNull GRoute gRoute) {
 		if (StringUtils.isEmpty(gRoute.getRouteColor())) {
 			int rsn = Integer.parseInt(gRoute.getRouteShortName());
 			switch (rsn) {
 			// @formatter:off
-			case 1: return COLOR_8CC63F;
-			case 2: return COLOR_8077B6;
-			case 3: return COLOR_F8931E;
-			case 4: return COLOR_AC5C3B;
-			case 5: return COLOR_A54499;
-			case 6: return COLOR_00AEEF;
-			case 7: return COLOR_00AA4F;
-			case 9: return null; // TODO?
-			case 12: return COLOR_0073AE;
-			case 15: return COLOR_49176D;
-			case 16: return COLOR_B3AA7E;
-			case 17: return COLOR_77AE99;
-			case 21: return COLOR_7C3F25;
-			case 22: return COLOR_FFC20E;
-			case 23: return COLOR_A3BADC;
-			case 24: return COLOR_ED1D8F;
-			case 26: return COLOR_F49AC1;
-			case 31: return COLOR_BF83B9;
-			case 32: return COLOR_EC1D8D;
-			case 33: return COLOR_367D0F;
-			case 34: return COLOR_FFC10E;
-			case 35: return COLOR_F78B1F;
-			case 39: return COLOR_0073AD;
-			case 40: return COLOR_49176D;
-			case 66: return COLOR_0D4D8B;
+			case 1: return "8CC63F";
+			case 2: return "8077B6";
+			case 3: return "F8931E";
+			case 4: return "AC5C3B";
+			case 5: return "A54499";
+			case 6: return "00AEEF";
+			case 7: return "00AA4F";
+			case 9: return "A2BCCF";
+			case 12: return "0073AE";
+			case 15: return "49176D";
+			case 16: return "B3AA7E";
+			case 17: return "77AE99";
+			case 21: return "7C3F25";
+			case 22: return "FFC20E";
+			case 23: return "A3BADC";
+			case 24: return "ED1D8F";
+			case 26: return "F49AC1";
+			case 31: return "BF83B9";
+			case 32: return "EC1D8D";
+			case 33: return "367D0F";
+			case 34: return "FFC10E";
+			case 35: return "F78B1F";
+			case 39: return "0073AD";
+			case 40: return "49176D";
+			case 66: return "0D4D8B";
 			// @formatter:on
 			default:
-				throw new MTLog.Fatal("%s: Unexpected route color: %s!", gRoute.getRouteId(), gRoute);
+				throw new MTLog.Fatal("Unexpected route color for %s!", gRoute.toStringPlus());
 			}
 		}
 		return super.getRouteColor(gRoute);
@@ -199,15 +184,17 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 	private static final String SUMAS_MTN = "Sumas Mtn";
 	private static final String UFV = "UFV";
 
-	private static HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
+	private static final HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
+
 	static {
 		HashMap<Long, RouteTripSpec> map2 = new HashMap<>();
+		//noinspection deprecation
 		map2.put(24L, new RouteTripSpec(24L, // BECAUSE same head-sign for 2 differents trip direction
 				0, MTrip.HEADSIGN_TYPE_STRING, "CW", // PM
 				1, MTrip.HEADSIGN_TYPE_STRING, "CCW") // AM
 				.addTripSort(0, //
 						Arrays.asList( //
-						"107500", // Bourquin Exchange Bay B
+								"107500", // Bourquin Exchange Bay B
 								"107021", // ++
 								"107013", // ++
 								"107166", // ++
@@ -215,19 +202,20 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 						)) //
 				.addTripSort(1, //
 						Arrays.asList( //
-						"107500", // Bourquin Exchange Bay B
+								"107500", // Bourquin Exchange Bay B
 								"107122", // ++
 								"107303", // ++
 								"107085", // ++
 								"107500" // Bourquin Exchange Bay B
 						)) //
 				.compileBothTripSort());
+		//noinspection deprecation
 		map2.put(26L, new RouteTripSpec(26L, // BECAUSE same head-sign for 2 differents trip direction
 				0, MTrip.HEADSIGN_TYPE_STRING, SANDY_HILL, //
 				1, MTrip.HEADSIGN_TYPE_STRING, BOURQUIN_EXCHANGE) //
 				.addTripSort(0, //
 						Arrays.asList( //
-						"108262", // Bourquin Exchange Bay D
+								"108262", // Bourquin Exchange Bay D
 								"107039", // ==
 								"120016", // !=
 								"105727", // != Eastbound 34970 block Old Clayburn
@@ -239,7 +227,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 						)) //
 				.addTripSort(1, //
 						Arrays.asList( //
-						"120017", // != Eastbound Sandy Hill at Old Clayburn <= START
+								"120017", // != Eastbound Sandy Hill at Old Clayburn <= START
 								"107390", // Southbound McKee at Selkirk
 								"107067", // !=
 								"107053", // != Southbound Old Clayburn at Sandy Hill <= START
@@ -251,35 +239,37 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 								"107499" // != Bourquin Exchange Bay A
 						)) //
 				.compileBothTripSort());
+		//noinspection deprecation
 		map2.put(34L, new RouteTripSpec(34L, // BECAUSE same head-sign for 2 differents trip direction
 				MDirectionType.NORTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.NORTH.getId(), //
 				MDirectionType.SOUTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.SOUTH.getId()) //
 				.addTripSort(MDirectionType.NORTH.intValue(), //
 						Arrays.asList( //
-						"107784", // == != Downtown Exchange Bay B
+								"107784", // == != Downtown Exchange Bay B
 								"107756", // != <>
 								"107819", // == !=
 								"107834" // Southbound Stave Lake at Dewdney Trunk
 						)) //
 				.addTripSort(MDirectionType.SOUTH.intValue(), //
 						Arrays.asList( //
-						"107834", // Southbound Stave Lake at Dewdney Trunk
+								"107834", // Southbound Stave Lake at Dewdney Trunk
 								"107847", // == !=
 								"107756", // != <>
 								"107784" // == != Downtown Exchange Bay B
 						)) //
 				.compileBothTripSort());
-		map2.put(35L, new RouteTripSpec(35L, // BECAUSE same head-sign for 2 differents trip direction
+		//noinspection deprecation
+		map2.put(35L, new RouteTripSpec(35L, // BECAUSE same head-sign for 2 different trip direction
 				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), //
 				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) //
 				.addTripSort(MDirectionType.EAST.intValue(), //
 						Arrays.asList( //
-						"107784", // Downtown Exchange Bay B
+								"107784", // Downtown Exchange Bay B
 								"107855" // Northbound Draper at Douglas
 						)) //
 				.addTripSort(MDirectionType.WEST.intValue(), //
 						Arrays.asList( //
-						"107855", // Northbound Draper at Douglas
+								"107855", // Northbound Draper at Douglas
 								"107784" // Downtown Exchange Bay B
 						)) //
 				.compileBothTripSort());
@@ -287,23 +277,25 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 	}
 
 	@Override
-	public int compareEarly(long routeId, List<MTripStop> list1, List<MTripStop> list2, MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop) {
+	public int compareEarly(long routeId, @NotNull List<MTripStop> list1, @NotNull List<MTripStop> list2, @NotNull MTripStop ts1, @NotNull MTripStop ts2, @NotNull GStop ts1GStop, @NotNull GStop ts2GStop) {
 		if (ALL_ROUTE_TRIPS2.containsKey(routeId)) {
 			return ALL_ROUTE_TRIPS2.get(routeId).compare(routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop, this);
 		}
 		return super.compareEarly(routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop);
 	}
 
+	@NotNull
 	@Override
-	public ArrayList<MTrip> splitTrip(MRoute mRoute, GTrip gTrip, GSpec gtfs) {
+	public ArrayList<MTrip> splitTrip(@NotNull MRoute mRoute, @Nullable GTrip gTrip, @NotNull GSpec gtfs) {
 		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
 			return ALL_ROUTE_TRIPS2.get(mRoute.getId()).getAllTrips();
 		}
 		return super.splitTrip(mRoute, gTrip, gtfs);
 	}
 
+	@NotNull
 	@Override
-	public Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, ArrayList<MTrip> splitTrips, GSpec routeGTFS) {
+	public Pair<Long[], Integer[]> splitTripStop(@NotNull MRoute mRoute, @NotNull GTrip gTrip, @NotNull GTripStop gTripStop, @NotNull ArrayList<MTrip> splitTrips, @NotNull GSpec routeGTFS) {
 		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
 			return SplitUtils.splitTripStop(mRoute, gTrip, gTripStop, routeGTFS, ALL_ROUTE_TRIPS2.get(mRoute.getId()), this);
 		}
@@ -311,21 +303,24 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 	}
 
 	@Override
-	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
+	public void setTripHeadsign(@NotNull MRoute mRoute, @NotNull MTrip mTrip, @NotNull GTrip gTrip, @NotNull GSpec gtfs) {
 		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
 			return; // split
 		}
-		mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), gTrip.getDirectionId());
+		mTrip.setHeadsignString(
+				cleanTripHeadsign(gTrip.getTripHeadsignOrDefault()),
+				gTrip.getDirectionIdOrDefault()
+		);
 	}
 
 	@Override
-	public boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge) {
+	public boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge) {
 		List<String> headsignsValues = Arrays.asList(mTrip.getHeadsignValue(), mTripToMerge.getHeadsignValue());
 		if (mTrip.getRouteId() == 1L) {
 			if (Arrays.asList( //
 					BOURQUIN_EXCHANGE, //
 					UFV //
-					).containsAll(headsignsValues)) {
+			).containsAll(headsignsValues)) {
 				mTrip.setHeadsignString(UFV, mTrip.getHeadsignId());
 				return true;
 			}
@@ -333,7 +328,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 			if (Arrays.asList( //
 					BOURQUIN_EXCHANGE, // <>
 					MC_MILLAN //
-					).containsAll(headsignsValues)) {
+			).containsAll(headsignsValues)) {
 				mTrip.setHeadsignString(MC_MILLAN, mTrip.getHeadsignId());
 				return true;
 			}
@@ -341,24 +336,24 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 			if (Arrays.asList( //
 					SUMAS_CTR, // <>
 					CLEARBROOK //
-					).containsAll(headsignsValues)) {
+			).containsAll(headsignsValues)) {
 				mTrip.setHeadsignString(CLEARBROOK, mTrip.getHeadsignId());
 				return true;
 			}
 			if (Arrays.asList( //
 					SUMAS_CTR, // <>
 					HUNTINGDON //
-					).containsAll(headsignsValues)) {
+			).containsAll(headsignsValues)) {
 				mTrip.setHeadsignString(HUNTINGDON, mTrip.getHeadsignId());
 				return true;
 			}
 		} else if (mTrip.getRouteId() == 4L) {
 			if (Arrays.asList( //
-					"Counterclockwise", //
+					"CCW", //
 					BOURQUIN_EXCHANGE, //
 					DOWNTOWN, //
 					SADDLE //
-					).containsAll(headsignsValues)) {
+			).containsAll(headsignsValues)) {
 				mTrip.setHeadsignString(SADDLE, mTrip.getHeadsignId());
 				return true;
 			}
@@ -367,7 +362,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 					BOURQUIN_EXCHANGE, //
 					DOWNTOWN, //
 					SUMAS_MTN //
-					).containsAll(headsignsValues)) {
+			).containsAll(headsignsValues)) {
 				mTrip.setHeadsignString(SUMAS_MTN, mTrip.getHeadsignId());
 				return true;
 			}
@@ -375,7 +370,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 			if (Arrays.asList( //
 					BOURQUIN_EXCHANGE, //
 					DOWNTOWN //
-					).containsAll(headsignsValues)) {
+			).containsAll(headsignsValues)) {
 				mTrip.setHeadsignString(DOWNTOWN, mTrip.getHeadsignId());
 				return true;
 			}
@@ -407,33 +402,28 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 		throw new MTLog.Fatal("%s: Unexpected trips to merge: %s & %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
 	}
 
-	private static final Pattern EXCHANGE = Pattern.compile("((^|\\W){1}(exchange)(\\W|$){1})", Pattern.CASE_INSENSITIVE);
+	private static final Pattern EXCHANGE = Pattern.compile("((^|\\W)(exchange)(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String EXCHANGE_REPLACEMENT = "$2" + EXCHANGE_SHORT + "$4";
-
-	private static final Pattern UFV_ = Pattern.compile("((^|\\W){1}(ufv)(\\W|$){1})", Pattern.CASE_INSENSITIVE);
-	private static final String UFV_REPLACEMENT = "$2UFV$4";
 
 	private static final Pattern ENDS_WITH_CONNECTOR = Pattern.compile("( connector$)", Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern STARTS_WITH_DASH = Pattern.compile("(^.*( )?\\- )", Pattern.CASE_INSENSITIVE);
+	private static final Pattern STARTS_WITH_DASH = Pattern.compile("(^.*( )?- )", Pattern.CASE_INSENSITIVE);
 
+	@NotNull
 	@Override
-	public String cleanTripHeadsign(String tripHeadsign) {
-		if (Utils.isUppercaseOnly(tripHeadsign, true, true)) {
-			tripHeadsign = tripHeadsign.toLowerCase(Locale.ENGLISH);
-		}
+	public String cleanTripHeadsign(@NotNull String tripHeadsign) {
 		tripHeadsign = EXCHANGE.matcher(tripHeadsign).replaceAll(EXCHANGE_REPLACEMENT);
-		tripHeadsign = UFV_.matcher(tripHeadsign).replaceAll(UFV_REPLACEMENT);
 		tripHeadsign = CleanUtils.keepToAndRemoveVia(tripHeadsign);
-		tripHeadsign = STARTS_WITH_DASH.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
-		tripHeadsign = ENDS_WITH_CONNECTOR.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
+		tripHeadsign = STARTS_WITH_DASH.matcher(tripHeadsign).replaceAll(EMPTY);
+		tripHeadsign = ENDS_WITH_CONNECTOR.matcher(tripHeadsign).replaceAll(EMPTY);
 		tripHeadsign = CleanUtils.CLEAN_AND.matcher(tripHeadsign).replaceAll(CleanUtils.CLEAN_AND_REPLACEMENT);
 		tripHeadsign = CleanUtils.cleanStreetTypes(tripHeadsign);
 		return CleanUtils.cleanLabel(tripHeadsign);
 	}
 
+	@NotNull
 	@Override
-	public String cleanStopName(String gStopName) {
+	public String cleanStopName(@NotNull String gStopName) {
 		gStopName = CleanUtils.cleanBounds(gStopName);
 		gStopName = CleanUtils.CLEAN_AT.matcher(gStopName).replaceAll(CleanUtils.CLEAN_AT_REPLACEMENT);
 		gStopName = EXCHANGE.matcher(gStopName).replaceAll(EXCHANGE_REPLACEMENT);
