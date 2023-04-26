@@ -15,7 +15,6 @@ import org.mtransit.parser.mt.data.MAgency;
 import java.util.regex.Pattern;
 
 // https://www.bctransit.com/open-data
-// https://www.bctransit.com/data/gtfs/central-fraser-valley.zip
 public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgencyTools {
 
 	public static void main(@NotNull String[] args) {
@@ -25,6 +24,14 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 	@Override
 	public boolean defaultExcludeEnabled() {
 		return true;
+	}
+
+	@Override
+	public boolean excludeRoute(@NotNull GRoute gRoute) {
+		if (gRoute.getRouteLongNameOrDefault().contains("FVX")) {
+			return EXCLUDE; // available in Fraser Valley Express app
+		}
+		return super.excludeRoute(gRoute);
 	}
 
 	@NotNull
