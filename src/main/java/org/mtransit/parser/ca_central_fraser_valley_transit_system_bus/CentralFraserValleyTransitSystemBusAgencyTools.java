@@ -26,36 +26,20 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 		return true;
 	}
 
-	@Override
-	public boolean excludeRoute(@NotNull GRoute gRoute) {
-		if (gRoute.getRouteLongNameOrDefault().contains("FVX")) {
-			return EXCLUDE; // available in Fraser Valley Express app
-		}
-		return super.excludeRoute(gRoute);
-	}
-
 	@NotNull
 	@Override
 	public String getAgencyName() {
 		return "CFV TS";
 	}
 
-	private static final String INCLUDE_AGENCY_ID = "6"; // CFV Transit System only
-
-	@Override
-	public boolean excludeAgency(@NotNull GAgency gAgency) {
-		//noinspection deprecation
-		if (!INCLUDE_AGENCY_ID.equals(gAgency.getAgencyId())) {
-			return EXCLUDE;
-		}
-		return super.excludeAgency(gAgency);
-	}
-
 	@Override
 	public boolean excludeRoute(@NotNull GRoute gRoute) {
-		//noinspection deprecation
-		if (gRoute.isDifferentAgency(INCLUDE_AGENCY_ID)) {
-			return true;
+		if (gRoute.getRouteLongNameOrDefault().contains("FVX")) {
+			return EXCLUDE; // available in Fraser Valley Express app
+		}
+		final int rsn = Integer.parseInt(gRoute.getRouteShortName());
+		if (rsn > 50) {
+			return EXCLUDE; // available in Chilliwack app
 		}
 		return super.excludeRoute(gRoute);
 	}
@@ -104,42 +88,39 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 	@SuppressWarnings("DuplicateBranchesInSwitch")
 	@Nullable
 	@Override
-	public String getRouteColor(@NotNull GRoute gRoute, @NotNull MAgency agency) {
-		if (StringUtils.isEmpty(gRoute.getRouteColor())) {
-			final int rsn = Integer.parseInt(gRoute.getRouteShortName());
-			switch (rsn) {
-			// @formatter:off
-			case 1: return "8CC63F";
-			case 2: return "8077B6";
-			case 3: return "F8931E";
-			case 4: return "AC5C3B";
-			case 5: return "A54499";
-			case 6: return "00AEEF";
-			case 7: return "00AA4F";
-			case 9: return "A2BCCF";
-			case 12: return "0073AE";
-			case 15: return "49176D";
-			case 16: return "B3AA7E";
-			case 17: return "77AE99";
-			case 21: return "7C3F25";
-			case 22: return "FFC20E";
-			case 23: return "A3BADC";
-			case 24: return "ED1D8F";
-			case 26: return "F49AC1";
-			case 31: return "BF83B9";
-			case 32: return "EC1D8D";
-			case 33: return "367D0F";
-			case 34: return "FFC10E";
-			case 35: return "F78B1F";
-			case 39: return "0073AD";
-			case 40: return "49176D";
-			case 66: return "0D4D8B";
-			// @formatter:on
-			default:
-				throw new MTLog.Fatal("Unexpected route color for %s!", gRoute.toStringPlus());
-			}
+	public String provideMissingRouteColor(@NotNull GRoute gRoute) {
+		final int rsn = Integer.parseInt(gRoute.getRouteShortName());
+		switch (rsn) {
+		// @formatter:off
+		case 1: return "8CC63F";
+		case 2: return "8077B6";
+		case 3: return "F8931E";
+		case 4: return "AC5C3B";
+		case 5: return "A54499";
+		case 6: return "00AEEF";
+		case 7: return "00AA4F";
+		case 9: return "A2BCCF";
+		case 12: return "0073AE";
+		case 15: return "49176D";
+		case 16: return "B3AA7E";
+		case 17: return "77AE99";
+		case 21: return "7C3F25";
+		case 22: return "FFC20E";
+		case 23: return "A3BADC";
+		case 24: return "ED1D8F";
+		case 26: return "F49AC1";
+		case 31: return "BF83B9";
+		case 32: return "EC1D8D";
+		case 33: return "367D0F";
+		case 34: return "FFC10E";
+		case 35: return "F78B1F";
+		case 39: return "0073AD";
+		case 40: return "49176D";
+		case 66: return "0D4D8B";
+		// @formatter:on
+		default:
+			throw new MTLog.Fatal("Unexpected route color for %s!", gRoute.toStringPlus());
 		}
-		return super.getRouteColor(gRoute, agency);
 	}
 
 	@Override
