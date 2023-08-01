@@ -41,7 +41,7 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 		if (CharUtils.isDigitsOnly(gRoute.getRouteShortName())) {
 			final int rsn = Integer.parseInt(gRoute.getRouteShortName());
 			if (rsn > 50) {
-				rreturn EXCLUDE; // available in Chilliwack app
+				return EXCLUDE; // available in Chilliwack app
 			}
 		}
 		return super.excludeRoute(gRoute);
