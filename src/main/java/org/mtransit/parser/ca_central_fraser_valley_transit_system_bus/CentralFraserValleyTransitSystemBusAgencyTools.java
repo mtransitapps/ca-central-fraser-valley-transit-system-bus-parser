@@ -6,10 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.CharUtils;
 import org.mtransit.commons.CleanUtils;
-import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.MTLog;
-import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.mt.data.MAgency;
 
@@ -140,11 +138,19 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 		return true;
 	}
 
+	@Override
+	public boolean allowNonDescriptiveHeadSigns(long routeId) {
+		if (routeId == 26L) {
+			return true; // 2023-12-26: it's a mess
+		}
+		return super.allowNonDescriptiveHeadSigns(routeId);
+	}
+
 	private static final Pattern BAY_AZ_ = CleanUtils.cleanWords("bay [a-z]");
 
 	@NotNull
 	@Override
-	public String cleanDirectionHeadsign(boolean fromStopName, @NotNull String directionHeadSign) {
+	public String cleanDirectionHeadsign(int directionId, boolean fromStopName, @NotNull String directionHeadSign) {
 		directionHeadSign = PARSE_HEAD_SIGN_WITH_DASH_.matcher(directionHeadSign).replaceAll(PARSE_HEAD_SIGN_WITH_DASH_KEEP_TO);
 		directionHeadSign = CleanUtils.keepToAndRemoveVia(directionHeadSign);
 		directionHeadSign = cleanHeadSign(directionHeadSign);
