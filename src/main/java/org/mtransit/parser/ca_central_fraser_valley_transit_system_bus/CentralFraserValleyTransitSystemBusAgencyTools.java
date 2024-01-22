@@ -58,7 +58,12 @@ public class CentralFraserValleyTransitSystemBusAgencyTools extends DefaultAgenc
 
 	@Override
 	public boolean useRouteShortNameForRouteId() {
-		return true;
+		return false; // GTFS-RT
+	}
+
+	@Override
+	public @Nullable String getRouteIdCleanupRegex() {
+		return "\\-[A-Z]+$";
 	}
 
 	@Override
